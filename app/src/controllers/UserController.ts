@@ -25,4 +25,16 @@ export class UserController {
       res.status(500).json({ message: err });
     }
   }
+
+  static createUser = async (req: Request, res: Response) => {
+    try {
+      const newUser = req.body;
+      await user.create(newUser);
+      res.status(200).json({"menssager":"Usuário criado!"});
+    } catch(err) {
+
+    }
+  }
 }
+  
+
