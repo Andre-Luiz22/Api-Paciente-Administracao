@@ -3,4 +3,4 @@ import { UserController } from "../controllers/UserController";
 
 export const router = express.Router();
 
-router.get("/user", UserController.findAllUsers);
+router.get("/user", UserController.findAllUsers).get("/user/:email", UserController.getUserByEmail);
