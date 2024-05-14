@@ -19,7 +19,7 @@ export class UserController {
     const emailUser = req.params.email;
     try {
       const returnedUser = await user.find({ email: emailUser });
-      if (returnedUser == null) { throw "Usuário não encontrado" };
+      if (returnedUser.length === 0) { throw "Usuário não encontrado" };
       res.status(200).json(returnedUser);
     } catch (err) {
       res.status(500).json({ message: err });
