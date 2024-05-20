@@ -4,9 +4,6 @@ import { log } from "console";
 import { builtinModules } from "module";
 
 export class UserController {
-  static routeUser = (req: Request, res: Response) => {
-    res.status(200).send("<h1>Rota de user</h1>");
-  };
 
   static findAllUsers = async (req: Request, res: Response) => {
     try {
