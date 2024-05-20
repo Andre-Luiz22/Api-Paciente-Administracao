@@ -12,11 +12,7 @@ interface IUser {
   password: string;
 }
 
-interface IToSendToUser {
-  _id: string;
-  nick: string;
-  email: string;
-}
+type IuserToSend = Omit<IUser, "password">
 
 type TSignInUser = Omit<IUser, "_id" | "nick">;
 
@@ -33,7 +29,10 @@ export class UserController {
     try {
       const returnedUser = await user.find({ email: emailUser });
       if (returnedUser.length === 0) {
-        throw "Usuário não encontrado";
+        throw {
+          error: "u202",
+          message: "Usuário não encontrado"
+        };
       }
       res.status(200).json(returnedUser);
     } catch (err) {
@@ -48,10 +47,16 @@ export class UserController {
 
       const thisEmailExists = await user.find({ email });
       if (thisEmailExists.length === 1) {
-        throw "Email já cadastrado";
+        throw {
+          error: "u203",
+          message: "Email já cadastrado"
+        };
       }
       if (thisEmailExists.length > 1) {
-        throw "Erro crítico, esse email já foi cadastrado duas vezes.";
+        throw {
+          error: "u204",
+          message: "Erro crítico, esse email já foi cadastrado duas vezes."
+        }
       }
 
       const newUser = {
