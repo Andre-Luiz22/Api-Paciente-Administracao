@@ -8,4 +8,9 @@ const LessonSchema = new mongoose.Schema(
     video: { type: mongoose.Schema.Types.String },
     extra: { type: mongoose.Schema.Types.Array }
   },
+  {
+    versionKey: false,
+  }
+);
+
 export const user = mongoose.model("Lesson", LessonSchema);
