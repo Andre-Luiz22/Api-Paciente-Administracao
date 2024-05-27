@@ -5,4 +5,5 @@ export const router = express.Router();
 
 router.get("/user", UserController.findAllUsers)
 .get("/user/:email", UserController.getUserByEmail)
-.post("/user", UserController.createUser);
+.post("/user", UserController.createUser)
+.post("/user/login", UserController.logInUser);

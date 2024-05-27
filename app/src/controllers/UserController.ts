@@ -6,76 +6,112 @@ const saltRounds = Math.floor(Math.random() * (16 - 10 + 1)) + 10;
 const salt = bcrypt.genSaltSync(saltRounds);
 
 interface IUser {
-  _id: string;
-  nick: string;
-  email: string;
-  password: string;
+    _id: string;
+    nick: string;
+    email: string;
+    password: string;
 }
 
-type IuserToSend = Omit<IUser, "password">
+type IuserToSend = Omit<IUser, "password">;
 
 type TSignInUser = Omit<IUser, "_id" | "nick">;
 
 export class UserController {
-  static findAllUsers = async (req: Request, res: Response) => {
-    try {
-      const allUsers = await user.find();
-      res.status(200).json(allUsers);
-    } catch (err) {}
-  };
+    static findAllUsers = async (req: Request, res: Response) => {
+        try {
+            const allUsers = await user.find();
+            res.status(200).json(allUsers);
+        } catch (err) {}
+    };
 
-  static getUserByEmail = async (req: Request, res: Response) => {
-    const emailUser = req.params.email;
-    try {
-      const returnedUser = await user.find({ email: emailUser });
-      if (returnedUser.length === 0) {
-        throw {
-          error: "u202",
-          message: "Usuário não encontrado"
-        };
-      }
-      res.status(200).json(returnedUser);
-    } catch (err) {
-      res.status(500).json({ message: err });
-    }
-  };
-
-  static createUser = async (req: Request, res: Response) => {
-    try {
-      const { email, nick, password }: IUser = req.body;
-      const cryptoPassword = bcrypt.hashSync(password.trim(), salt);
-
-      const thisEmailExists = await user.find({ email });
-      if (thisEmailExists.length === 1) {
-        throw {
-          error: "u203",
-          message: "Email já cadastrado"
-        };
-      }
-      if (thisEmailExists.length > 1) {
-        throw {
-          error: "u204",
-          message: "Erro crítico, esse email já foi cadastrado duas vezes."
+    static getUserByEmail = async (req: Request, res: Response) => {
+        const emailUser = req.params.email;
+        try {
+            const returnedUser = await user.find({ email: emailUser });
+            if (returnedUser.length === 0) {
+                throw {
+                    error: "u202",
+                    message: "Usuário não encontrado",
+                };
+            }
+            res.status(200).json(returnedUser);
+        } catch (err) {
+            res.status(500).json({ message: err });
         }
-      }
+    };
 
-      const newUser = {
-        nick: nick.trim(),
-        email: email.trim(),
-        password: cryptoPassword,
-      };
+    static createUser = async (req: Request, res: Response) => {
+        try {
+            const { email, nick, password }: IUser = req.body;
+            const cryptoPassword = bcrypt.hashSync(password.trim(), salt);
 
-      await user.create(newUser);
+            const thisEmailExists = await user.find({ email });
+            if (thisEmailExists.length === 1) {
+                throw {
+                    error: "u203",
+                    message: "Email já cadastrado",
+                };
+            }
+            if (thisEmailExists.length > 1) {
+                throw {
+                    error: "u204",
+                    message:
+                        "Erro crítico, esse email já foi cadastrado duas vezes.",
+                };
+            }
 
-      const bdData: Array<IUser> = await user.find({ email });
+            const newUser = {
+                nick: nick.trim(),
+                email: email.trim(),
+                password: cryptoPassword,
+            };
 
-      const { _id, nick: toSendNick, email: toSendEmail } = bdData[0];
+            await user.create(newUser);
 
-      const userToSend = { _id, nick: toSendNick, email: toSendEmail };
+            const bdData: Array<IUser> = await user.find({ email });
 
-      res.status(200).json({ token: "token vem aqui", user: userToSend });
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  }; 
+            const { _id, nick: toSendNick, email: toSendEmail } = bdData[0];
+
+            const userToSend = { _id, nick: toSendNick, email: toSendEmail };
+
+            res.status(200).json({ token: "token vem aqui", user: userToSend });
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    };
+
+    static logInUser = async (req: Request, res: Response) => {
+        try {
+            const { email, password }: IUser = req.body;
+            const checkEmail = await user.find({ email });
+            if (checkEmail.length === 0) {
+                throw {
+                    error: "u206",
+                    message: "E-mail não encontrado",
+                };
+            } else if (checkEmail.length > 1) {
+              throw {
+                  error: "u207",
+                  message: "Erro crítico, mais de um usuário retornado com mesmo e-mail",
+              };
+          }
+            // compara senha do BD e da req
+            const isPasswordMatch = await bcrypt.compare(password, checkEmail[0].password as string
+            );
+            
+            if(isPasswordMatch){
+              const { _id, nick: toSendNick, email: toSendEmail } = checkEmail[0];
+              const userToSend = { _id, nick: toSendNick, email: toSendEmail };
+              res.status(200).json({ token: "token vem aqui", user: userToSend });              
+            } else {
+              throw {
+                error : "u207",
+                message: "Senha incorreta"
+              }
+            }
+
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    };
 }
