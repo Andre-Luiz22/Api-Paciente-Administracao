@@ -87,7 +87,7 @@ export class UserController {
             if (checkEmail.length === 0) {
                 throw {
                     error: "u206",
-                    message: "E-mail não encontrado",
+                    message: "E-mail não cadastrado",
                 };
             } else if (checkEmail.length > 1) {
               throw {
@@ -105,7 +105,7 @@ export class UserController {
               res.status(200).json({ token: "token vem aqui", user: userToSend });              
             } else {
               throw {
-                error : "u207",
+                error : "u208",
                 message: "Senha incorreta"
               }
             }
